@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base href="/product/"/>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<!-- 引入easyui核心样式 -->
+<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+<!-- 引入icon图标样式 -->
+<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+<!-- 引入easyui依赖的jquery库 -->
+<script type="text/javascript" src="easyui/jquery.min.js"></script>
+<!-- 引入easyui的核心库 -->
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+<script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		$('#dg').datagrid({    
+		    url:'/product/admin/adminProductServlet?method=findByPage',    
+		    columns:[[    
+		        {field:'pid',title:'商品编号',width:100},    
+		        {field:'pname',title:'商品名称',width:100},    
+		        {field:'shop_price',title:'商品价格',width:100,align:'right'},    
+		        {field:'pimage',title:'图片', width:80,
+					formatter: function(value,row,index){
+						return "<img src='"+value+"' width='40' height='40'/>";
+					}
+		        },
+		        {field:'is_hot',title:'是否热门',width:100,
+		        	formatter: function(value,row,index){
+						return value==1?"是":"否";
+					}
+		        }  
+		    ]],
+		    pageNumber:1, //默认第1页
+		    pagination:true,//添加分页工具条
+		    pageSize:6, //默认每页显示条数
+		    pageList:[6,12,14,20], //下拉列表
+		    toolbar: [{
+				iconCls: 'icon-add',
+				handler: function(){
+					$('#win').window('open');  // open a window  
+					
+					//回显示下拉列表
+					$('#saveProduct').form('clear');//清空表单
+					var url = "/product/categoryServlet";
+					var data = {"method":"findAllCategory"};
+					//$("#category")[0].length = 0;
+					$("#category").empty().append("<option >--请选择--</option>");
+					$.post(url,data,function(result){
+						//[{"cid":"1","cname":"手机数码"}，{"cid":"2","cname":"电脑办公"}]
+						$(result).each(function(i,n){
+							$("#category").append("<option value='"+n.cid+"'>"+n.cname+"</option>");
+						});
+					},"json");
+				}
+			}]
+
+		});  
+
+	});
+	
+	//添加商品
+	function addProduct(){
+		$('#saveProduct').form({    
+		    url:"/product/admin/adminProductServlet?method=addProduct",    
+		    success:function(data){    
+		       //1、关闭容器
+		       $('#win').window('close');  // open a window    
+		       //2、刷新表格
+		       $('#dg').datagrid('reload');    // 重新载入当前页面数据 
+		       //3、提示信息
+		       var json = eval("("+data+")")
+		       $.messager.show({
+		    		title:'我的消息',
+		    		msg:json.msg+': 消息将在3秒后关闭。',
+		    		timeout:3000,
+		    		showType:'slide'
+		    	});
+
+		    }    
+		});    
+		// submit the form    
+		$('#saveProduct').submit();  
+
+	}
+	
+</script>
+
+</head>
+<body>
+	<table id="dg"></table>
+	
+	<div id="win" class="easyui-window" title="添加商品.3" style="width:600px;"   
+        data-options="iconCls:'icon-save',modal:true,closed:true">   
+	  	<!-- 添加商品 -->
+		<form id="saveProduct" method="post" enctype="multipart/form-data">
+			<table cellSpacing="1" cellPadding="5" width="100%" align="center" bgColor="#eeeeee" style="border: 1px solid #8ba7e3" border="0">
+				<tr>
+					<td width="18%" align="center" bgColor="#f5fafe" class="ta_01">
+						商品名称：
+					</td>
+					<td class="ta_01" bgColor="#ffffff">
+						<input type="text" name="pname" value="" id="userAction_save_do_logonName" class="bg"/>
+					</td>
+					<td width="18%" align="center" bgColor="#f5fafe" class="ta_01">
+						是否热门：
+					</td>
+					<td class="ta_01" bgColor="#ffffff">
+						<select name="is_hot">
+							<option value="1">是</option>
+							<option value="0">否</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td width="18%" align="center" bgColor="#f5fafe" class="ta_01">
+						市场价格：
+					</td>
+					<td class="ta_01" bgColor="#ffffff">
+						<input type="text" name="market_price" value="" id="userAction_save_do_logonName" class="bg"/>
+					</td>
+					<td width="18%" align="center" bgColor="#f5fafe" class="ta_01">
+						商城价格：
+					</td>
+					<td class="ta_01" bgColor="#ffffff">
+						<input type="text" name="shop_price" value="" id="userAction_save_do_logonName" class="bg"/>
+					</td>
+				</tr>
+				<tr>
+					<td width="18%" align="center" bgColor="#f5fafe" class="ta_01">
+						商品图片：
+					</td>
+					<td class="ta_01" bgColor="#ffffff" colspan="3">
+						<input type="file" name="pimage" />
+					</td>
+				</tr>
+				<tr>
+					<td width="18%" align="center" bgColor="#f5fafe" class="ta_01">
+						所属的分类：
+					</td>
+					<td class="ta_01" bgColor="#ffffff" colspan="3">
+						<select id="category" name="cid">
+								<option >--请选择--</option>						
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td width="18%" align="center" bgColor="#f5fafe" class="ta_01">
+						商品描述：
+					</td>
+					<td class="ta_01" bgColor="#ffffff" colspan="3">
+						<textarea name="pdesc" rows="5" cols="30"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td class="ta_01" style="WIDTH: 100%" align="center"
+						bgColor="#f5fafe" colSpan="4">
+						<button type="button"  value="确定" onclick="addProduct()" class="button_ok">
+							&#30830;&#23450;
+						</button>
+
+						<FONT face="宋体">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT>
+						<button type="reset" value="重置" class="button_cancel">&#37325;&#32622;</button>
+					</td>
+				</tr>
+			</table>
+		</form> 
+	</div> 
+	
+</body>
+</html>

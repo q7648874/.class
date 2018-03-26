@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base href="/product/"/>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<!-- 引入easyui核心样式 -->
+<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+<!-- 引入icon图标样式 -->
+<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+<!-- 引入easyui依赖的jquery库 -->
+<script type="text/javascript" src="easyui/jquery.min.js"></script>
+<!-- 引入easyui的核心库 -->
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+<script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		$('#dg').datagrid({    
+		    url:'/product/admin/adminOrderServlet?method=findByPage',    
+		    columns:[[    
+		        {field:'oid',title:'订单编号'},    
+		        {field:'ordertime',title:'订单时间'},    
+		        {field:'total',title:'total',align:'right'},    
+		        {field:'state',title:'订单状态'},
+		        {field:'uid',title:'用户编号'}  
+		    ]],
+		    pageNumber:1, //默认第1页
+		    pagination:true,//添加分页工具条
+		    pageSize:12, //默认每页显示条数
+		    pageList:[12,14,20] //下拉列表
+		    
+		});  
+
+	});
+	
+	
+	
+</script>
+
+</head>
+<body>
+	<table id="dg"></table>
+	
+
+	
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base href="/product/"/>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<!-- 引入easyui核心样式 -->
+<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+<!-- 引入icon图标样式 -->
+<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+<!-- 引入easyui依赖的jquery库 -->
+<script type="text/javascript" src="easyui/jquery.min.js"></script>
+<!-- 引入easyui的核心库 -->
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="easyui/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+	$(function(){
+		$('#dg').datagrid({    
+		    url:'/product/admin/adminCategoryServlet?method=findAllCategory',    //请求路径
+		    //[{"cid":"1","cname":"手机数码"},{"cid":"2","cname":"电脑办公"}]
+		    columns:[[    
+		        {field:'cid',title:'类别编号',width:200},    
+		        {field:'cname',title:'类别名称',width:100},    
+		        {field:'xxx',title:'操作', width:80,
+					formatter: function(value,row,index){
+						return "<a href=javascript:editCategory('"+row.cid+"')>修改</a> | <a href=javascript:delCategory('"+row.cid+"')>删除</a>";
+					}
+				}
+
+		    ]],
+		    toolbar: [{
+				iconCls: 'icon-add',
+				handler: function(){
+					//打开窗口
+					$('#win').window('open');  // open a window    
+				}
+			}]
+
+		});  
+		
+		//************添加分类************
+		//得到按钮，并绑定事件
+		$("#btn").click(function(){
+			$('#ff').form({    
+			    url:'/product/admin/adminCategoryServlet?method=addCategory',    
+			    success:function(data){   //{msg:"添加成功"} 
+			       //1、关闭窗口
+			       $('#win').window('close');  // close a window  
+			       //2、刷新表格
+			       $('#dg').datagrid('reload');    // 重新载入当前页面数据
+			       //3、提示消息窗口
+			       var json = eval("("+data+")");//（）是为了兼容各个浏览器
+			       $.messager.show({
+			    		title:'我的消息',
+			    		msg:json.msg+':消息将在3秒后关闭。',
+			    		timeout:3000,
+			    		showType:'slide'
+			    	});
+
+			    }    
+			});    
+			// submit the form    
+			$('#ff').submit();  
+
+		});
+
+		//******修改分类**********
+		//得到修改按钮，并绑定事件 
+		$("#btnUpdate").click(function(){
+			$('#ffUpdate').form('submit', {    
+			    url:'/product/admin/adminCategoryServlet?method=updateCategory',    
+			    success:function(data){    
+			    	//1、关闭窗口
+			       $('#winUpdate').window('close');  // close a window  
+			       //2、刷新表格
+			       $('#dg').datagrid('reload');    // 重新载入当前页面数据
+			       //3、提示消息窗口
+			       var json = eval("("+data+")");//（）是为了兼容各个浏览器
+			       $.messager.show({
+			    		title:'我的消息',
+			    		msg:json.msg+':消息将在3秒后关闭。',
+			    		timeout:2000,
+			    		showType:'slide'
+			    	});
+			    }    
+			});  
+		});
+	});
+	
+	
+	function delCategory(cid){
+		if(confirm("是否删除此类别？")){
+			var url = "/product/admin/adminCategoryServlet";
+			var data = {"method":"delCategory","cid":cid};
+			$.post(url,data,function(result){
+			       //2、刷新表格
+			       $('#dg').datagrid('reload');    // 重新载入当前页面数据
+			       //3、提示消息窗口
+			       $.messager.show({
+			    		title:'我的消息',
+			    		msg:result.msg+':消息将在3秒后关闭。',
+			    		timeout:3000,
+			    		showType:'slide'
+			    	});
+			},"json");
+		}
+	}
+	
+	//修改分类--回显数据
+	function editCategory(cid){
+		//打开修改窗口
+		$('#winUpdate').window('open');  // open a window  
+		//窗口中的表单回显数据
+		$('#ffUpdate').form('load','/product/admin/adminCategoryServlet?method=findByCid&cid='+cid);	// 读取表单的URL
+	}
+</script>
+
+</head>
+<body>
+	<table id="dg"></table>
+	
+	<!-- 添加分类窗口 -->
+	<div id="win" class="easyui-window" title="添加分类" style="width:300px;height:100px"   
+        data-options="iconCls:'icon-save',modal:true,closed:true">   
+	    <form id="ff" method="post">   
+		    <div>   
+		        <label for="name">分类名称:</label>   
+		        <input class="easyui-validatebox" type="text" name="cname" data-options="required:true" />   
+			   <input id="btn" type="button" value="添加">
+		    </div>   
+		</form>  
+	</div>
+	<!-- 修改分类窗口 -->
+	<div id="winUpdate" class="easyui-window" title="修改分类" style="width:300px;height:100px"   
+        data-options="iconCls:'icon-save',modal:true,closed:true">   
+	    <form id="ffUpdate" method="post">   
+	    	 <input type="hidden" name="cid"/>
+		    <div>   
+		        <label for="name">分类名称:</label>   
+		        <input class="easyui-validatebox" type="text" name="cname" data-options="required:true" />   
+			   <input id="btnUpdate" type="button" value="修改">
+		    </div>   
+		</form>   
+	</div>  
+</body>
+</html>
